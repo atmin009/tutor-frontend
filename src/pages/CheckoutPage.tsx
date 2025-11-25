@@ -67,11 +67,48 @@ export default function CheckoutPage() {
 
     const fetchCoursePrice = async () => {
       try {
+        console.log('🔍 Fetching course price for courseId:', courseId)
         const response = await apiClient.get(`/courses/${courseId}/public`)
-        const course = response.data.data
-        setOriginalPrice(course.salePrice || course.price)
-      } catch (err) {
-        console.error('Failed to fetch course price:', err)
+        console.log('✅ Course price response:', response.data)
+        
+        // Backend response format: { data: { id, title, price, ... }, message: "..." }
+        if (response.data && response.data.data) {
+          const course = response.data.data
+          console.log('📊 Course data:', course)
+          console.log('💰 Course price:', course.price)
+          console.log('💰 Course salePrice:', course.salePrice)
+          
+          // Use salePrice if available, otherwise use price
+          const finalPrice = course.salePrice !== null && course.salePrice !== undefined 
+            ? course.salePrice 
+            : course.price
+          
+          if (finalPrice !== null && finalPrice !== undefined) {
+            setOriginalPrice(finalPrice)
+          } else {
+            console.warn('⚠️ Course price is null or undefined')
+            setError('ไม่สามารถดึงราคาคอร์สได้')
+          }
+        } else {
+          console.error('❌ Invalid response format:', response.data)
+          setError('รูปแบบข้อมูลตอบกลับไม่ถูกต้อง')
+        }
+      } catch (err: any) {
+        console.error('❌ Failed to fetch course price:', err)
+        console.error('❌ Error details:', {
+          message: err.message,
+          status: err.response?.status,
+          statusText: err.response?.statusText,
+          data: err.response?.data,
+          url: err.config?.url,
+          baseURL: err.config?.baseURL,
+        })
+        
+        const errorMessage = err.response?.data?.message 
+          || err.response?.statusText 
+          || err.message 
+          || 'ไม่สามารถดึงราคาคอร์สได้'
+        setError(errorMessage)
       }
     }
 
