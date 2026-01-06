@@ -1,26 +1,37 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams, useParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 
 export default function PaymentSuccess() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const params = useParams<{ courseId?: string }>()
   const { isLoggedIn } = useAuthStore()
   const [courseId, setCourseId] = useState<string | null>(null)
 
+  // Extract courseId from query params or URL path
   useEffect(() => {
-    // Extract courseId from URL path or params
-    if (params.courseId) {
-      setCourseId(params.courseId)
-    } else {
-      const pathParts = window.location.pathname.split('/')
-      const learningIndex = pathParts.indexOf('learning')
-      if (learningIndex !== -1 && pathParts[learningIndex + 1]) {
-        setCourseId(pathParts[learningIndex + 1])
-      }
+    // Try to get courseId from query params first
+    const courseIdFromQuery = searchParams.get('courseId')
+    if (courseIdFromQuery) {
+      setCourseId(courseIdFromQuery)
+      return
     }
 
+    // Try to extract from URL path (if redirected from /learning/:courseId)
+    const pathParts = window.location.pathname.split('/')
+    const learningIndex = pathParts.indexOf('learning')
+    if (learningIndex !== -1 && pathParts[learningIndex + 1]) {
+      setCourseId(pathParts[learningIndex + 1])
+      return
+    }
+
+    // If still no courseId, try to get from referrer or other sources
+    // For now, set to null and redirect to dashboard
+    setCourseId(null)
+  }, [searchParams])
+
+  // Handle redirect logic separately
+  useEffect(() => {
     // If not logged in, redirect to login
     if (!isLoggedIn) {
       const redirectPath = window.location.pathname + window.location.search
