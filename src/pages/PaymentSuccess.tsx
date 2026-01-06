@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
+import apiClient from '../api/axios'
 
 export default function PaymentSuccess() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { isLoggedIn } = useAuthStore()
   const [courseId, setCourseId] = useState<string | null>(null)
+  const [isConfirming, setIsConfirming] = useState(false)
+  const [confirmError, setConfirmError] = useState<string | null>(null)
 
   // Extract courseId from query params or URL path
   useEffect(() => {
@@ -30,6 +33,40 @@ export default function PaymentSuccess() {
     setCourseId(null)
   }, [searchParams])
 
+  // Confirm payment when transaction ID is present
+  useEffect(() => {
+    if (!isLoggedIn) return
+
+    const transactionId = searchParams.get('idpay')
+    if (!transactionId) return
+
+    // Only confirm once
+    if (isConfirming) return
+
+    const confirmPayment = async () => {
+      setIsConfirming(true)
+      setConfirmError(null)
+
+      try {
+        console.log('💳 Confirming payment with transaction ID:', transactionId)
+        const response = await apiClient.post('/payments/confirm', {
+          transactionId,
+        })
+        console.log('✅ Payment confirmed:', response.data)
+      } catch (err: any) {
+        console.error('❌ Failed to confirm payment:', err)
+        // Don't show error to user if payment is already confirmed
+        if (err.response?.status !== 400 || !err.response?.data?.message?.includes('already confirmed')) {
+          setConfirmError(err.response?.data?.message || 'Failed to confirm payment')
+        }
+      } finally {
+        setIsConfirming(false)
+      }
+    }
+
+    confirmPayment()
+  }, [isLoggedIn, searchParams, isConfirming])
+
   // Handle redirect logic separately
   useEffect(() => {
     // If not logged in, redirect to login
@@ -39,22 +76,25 @@ export default function PaymentSuccess() {
       return
     }
 
-    // Redirect to learning page after 3 seconds
+    // Wait a bit for payment confirmation, then redirect
+    const redirectDelay = isConfirming ? 4000 : 3000
+
+    // Redirect to learning page after delay
     if (courseId) {
       const timer = setTimeout(() => {
         navigate(`/learning/${courseId}`, { replace: true })
-      }, 3000)
+      }, redirectDelay)
 
       return () => clearTimeout(timer)
     } else {
       // If no courseId, redirect to learning dashboard
       const timer = setTimeout(() => {
         navigate('/learning', { replace: true })
-      }, 3000)
+      }, redirectDelay)
 
       return () => clearTimeout(timer)
     }
-  }, [isLoggedIn, navigate, courseId])
+  }, [isLoggedIn, navigate, courseId, isConfirming])
 
   // Get payment details from query params
   const paymentId = searchParams.get('idpay')
