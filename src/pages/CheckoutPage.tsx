@@ -202,6 +202,28 @@ export default function CheckoutPage() {
           setIsPolling(false)
           clearInterval(pollInterval)
 
+          // Confirm payment to ensure enrollment is created
+          // Use orderId (always available) or transactionId if available
+          if (currentSession?.orderId) {
+            try {
+              console.log('💳 Confirming payment with orderId:', currentSession.orderId)
+              const confirmPayload: { orderId?: string; transactionId?: string } = {
+                orderId: currentSession.orderId,
+              }
+              
+              // Add transactionId if available (for card payments)
+              if (currentSession.transactionId) {
+                confirmPayload.transactionId = currentSession.transactionId
+              }
+              
+              await apiClient.post('/payments/confirm', confirmPayload)
+              console.log('✅ Payment confirmed and enrollment created')
+            } catch (err: any) {
+              console.error('❌ Failed to confirm payment:', err)
+              // Continue anyway as status is already paid
+            }
+          }
+
           // Redirect to learning page after short delay
           setTimeout(() => {
             navigate(`/learning/${courseId}`, { replace: true })

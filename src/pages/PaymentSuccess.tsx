@@ -15,6 +15,7 @@ export default function PaymentSuccess() {
     // Try to get courseId from query params first
     const courseIdFromQuery = searchParams.get('courseId')
     if (courseIdFromQuery) {
+      console.log('📝 CourseId from query:', courseIdFromQuery)
       setCourseId(courseIdFromQuery)
       return
     }
@@ -23,12 +24,14 @@ export default function PaymentSuccess() {
     const pathParts = window.location.pathname.split('/')
     const learningIndex = pathParts.indexOf('learning')
     if (learningIndex !== -1 && pathParts[learningIndex + 1]) {
+      console.log('📝 CourseId from path:', pathParts[learningIndex + 1])
       setCourseId(pathParts[learningIndex + 1])
       return
     }
 
     // If still no courseId, try to get from referrer or other sources
     // For now, set to null and redirect to dashboard
+    console.log('⚠️ No courseId found, will redirect to dashboard')
     setCourseId(null)
   }, [searchParams])
 
@@ -37,12 +40,16 @@ export default function PaymentSuccess() {
     if (!isLoggedIn) return
 
     const transactionId = searchParams.get('idpay')
-    if (!transactionId) return
+    if (!transactionId) {
+      console.log('ℹ️ No transaction ID found, skipping confirmation')
+      return
+    }
 
-    // Only confirm once
-    if (isConfirming) return
+    // Only confirm once - use a ref-like pattern with state
+    let isMounted = true
 
     const confirmPayment = async () => {
+      if (!isMounted) return
       setIsConfirming(true)
 
       try {
@@ -56,12 +63,18 @@ export default function PaymentSuccess() {
         // Log error but don't block user experience
         // Payment might already be confirmed via webhook
       } finally {
-        setIsConfirming(false)
+        if (isMounted) {
+          setIsConfirming(false)
+        }
       }
     }
 
     confirmPayment()
-  }, [isLoggedIn, searchParams, isConfirming])
+
+    return () => {
+      isMounted = false
+    }
+  }, [isLoggedIn, searchParams])
 
   // Handle redirect logic separately
   useEffect(() => {
@@ -73,22 +86,37 @@ export default function PaymentSuccess() {
     }
 
     // Wait a bit for payment confirmation, then redirect
-    const redirectDelay = isConfirming ? 4000 : 3000
+    // If confirming, wait longer; otherwise wait 2 seconds
+    const redirectDelay = isConfirming ? 2000 : 2000
+
+    console.log('🔄 Setting up redirect:', {
+      courseId,
+      isConfirming,
+      redirectDelay,
+    })
 
     // Redirect to learning page after delay
     if (courseId) {
       const timer = setTimeout(() => {
+        console.log('➡️ Redirecting to learning page:', `/learning/${courseId}`)
         navigate(`/learning/${courseId}`, { replace: true })
       }, redirectDelay)
 
-      return () => clearTimeout(timer)
+      return () => {
+        console.log('🧹 Cleaning up redirect timer')
+        clearTimeout(timer)
+      }
     } else {
       // If no courseId, redirect to learning dashboard
       const timer = setTimeout(() => {
+        console.log('➡️ Redirecting to learning dashboard')
         navigate('/learning', { replace: true })
       }, redirectDelay)
 
-      return () => clearTimeout(timer)
+      return () => {
+        console.log('🧹 Cleaning up redirect timer')
+        clearTimeout(timer)
+      }
     }
   }, [isLoggedIn, navigate, courseId, isConfirming])
 
