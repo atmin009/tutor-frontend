@@ -9,7 +9,6 @@ export default function PaymentSuccess() {
   const { isLoggedIn } = useAuthStore()
   const [courseId, setCourseId] = useState<string | null>(null)
   const [isConfirming, setIsConfirming] = useState(false)
-  const [confirmError, setConfirmError] = useState<string | null>(null)
 
   // Extract courseId from query params or URL path
   useEffect(() => {
@@ -45,7 +44,6 @@ export default function PaymentSuccess() {
 
     const confirmPayment = async () => {
       setIsConfirming(true)
-      setConfirmError(null)
 
       try {
         console.log('💳 Confirming payment with transaction ID:', transactionId)
@@ -55,10 +53,8 @@ export default function PaymentSuccess() {
         console.log('✅ Payment confirmed:', response.data)
       } catch (err: any) {
         console.error('❌ Failed to confirm payment:', err)
-        // Don't show error to user if payment is already confirmed
-        if (err.response?.status !== 400 || !err.response?.data?.message?.includes('already confirmed')) {
-          setConfirmError(err.response?.data?.message || 'Failed to confirm payment')
-        }
+        // Log error but don't block user experience
+        // Payment might already be confirmed via webhook
       } finally {
         setIsConfirming(false)
       }
