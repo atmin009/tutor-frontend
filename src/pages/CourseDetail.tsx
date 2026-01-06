@@ -62,6 +62,7 @@ export default function CourseDetail() {
       setError(null)
 
       try {
+        // Try to fetch by slug first
         const response = await apiClient.get<CourseResponse>(
           `/courses/${slug}/public`
         )
@@ -91,7 +92,64 @@ export default function CourseDetail() {
           }
         }
       } catch (err: any) {
-        setError(err.response?.data?.message || 'โหลดคอร์สไม่สำเร็จ')
+        console.error('❌ Error fetching course by slug:', err)
+        console.error('❌ Slug:', slug)
+        console.error('❌ Error response:', err.response?.data)
+        console.error('❌ Error status:', err.response?.status)
+        
+        // If the error suggests the slug lookup failed, try to find the course by searching
+        // This is a fallback in case the backend doesn't support slug lookups directly
+        if (err.response?.status === 404 || err.response?.data?.message?.includes('Invalid course ID')) {
+          try {
+            console.log('🔄 Trying to find course by slug from course list...')
+            // Try to fetch courses and find the one with matching slug
+            const searchResponse = await apiClient.get<{
+              data: {
+                data: Course[]
+                meta: any
+              }
+              message: string
+            }>(`/courses/public?limit=1000`)
+            
+            const courses = searchResponse.data.data?.data || []
+            const foundCourse = courses.find((c: Course) => c.slug === slug)
+            
+            if (foundCourse) {
+              console.log('✅ Found course by slug in list:', foundCourse)
+              // Now fetch the full course details using the ID
+              const fullResponse = await apiClient.get<CourseResponse>(
+                `/courses/${foundCourse.id}/public`
+              )
+              const courseData = fullResponse.data.data
+              setCourse(courseData)
+              
+              // Check enrollment if logged in
+              if (isLoggedIn && user && courseData.id) {
+                try {
+                  const enrollmentResponse = await apiClient.get<{
+                    data: { isEnrolled: boolean }
+                    message: string
+                  }>(`/me/check-enrollment/${courseData.id}`)
+                  setIsEnrolled(enrollmentResponse.data.data.isEnrolled)
+                } catch (enrollErr: any) {
+                  if (enrollErr.response?.status === 401 || enrollErr.response?.status === 404) {
+                    setIsEnrolled(false)
+                  } else {
+                    console.error('Failed to check enrollment:', enrollErr)
+                    setIsEnrolled(false)
+                  }
+                }
+              }
+              return // Success, exit early
+            }
+          } catch (fallbackErr: any) {
+            console.error('❌ Fallback search also failed:', fallbackErr)
+          }
+        }
+        
+        // If all attempts failed, show the error
+        const errorMessage = err.response?.data?.message || 'โหลดคอร์สไม่สำเร็จ'
+        setError(errorMessage)
       } finally {
         setIsLoading(false)
       }

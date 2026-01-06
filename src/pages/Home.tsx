@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import apiClient from '../api/axios'
+import { getCourseUrlIdentifier } from '../utils/courseHelper'
 
 interface Course {
   id: number
@@ -208,7 +209,7 @@ export default function Home() {
               {featuredCourses.map((course) => (
                 <Link
                   key={course.id}
-                  to={`/courses/${course.slug}`}
+                  to={`/courses/${getCourseUrlIdentifier(course)}`}
                   className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-lg"
                 >
                   <div className="relative aspect-video overflow-hidden bg-slate-100">
@@ -341,7 +342,7 @@ export default function Home() {
               {allCourses.slice(0, 8).map((course) => (
                 <Link
                   key={course.id}
-                  to={`/courses/${course.slug}`}
+                  to={`/courses/${getCourseUrlIdentifier(course)}`}
                   className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-lg"
                 >
                   <div className="relative aspect-video overflow-hidden bg-slate-100">

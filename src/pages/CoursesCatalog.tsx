@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import apiClient from '../api/axios'
+import { getCourseUrlIdentifier } from '../utils/courseHelper'
 
 type Course = {
   id: number
@@ -171,7 +172,7 @@ export default function CoursesCatalog() {
                     </div>
 
                     <Link
-                      to={`/courses/${course.slug}`}
+                      to={`/courses/${getCourseUrlIdentifier(course)}`}
                       className="mt-4 block w-full rounded-lg bg-[#003366] px-4 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-[#002244]"
                     >
                       รายละเอียด
