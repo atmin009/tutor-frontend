@@ -197,31 +197,21 @@ export default function CheckoutPage() {
 
         const order = response.data.data
         const status = order.status
-        const transactionId = order.transactionId || currentSession.transactionId
         
         console.log('📊 Payment status check:', {
           status,
-          transactionId,
           orderId: currentSession.orderId,
           paymentMethod,
-          hasTransactionId: !!transactionId,
         })
         setPaymentStatus(status)
 
-        // Check if payment is successful
-        // Status is "paid" OR has transaction ID but status is still "pending" (webhook might not have fired)
-        // For QR code payments, if transaction ID exists, payment is likely successful
-        const isPaid = status === 'paid' || (transactionId && status === 'pending' && paymentMethod === 'qrnone')
-        
-        if (isPaid && status !== 'paid') {
-          console.log('⚠️ Payment has transaction ID but status is still pending, will confirm payment')
-        }
-
-        if (isPaid) {
+        // Only proceed if status is explicitly "paid" (from webhook)
+        // Don't auto-confirm based on transactionId alone - transactionId is created when session is created, not when payment is made
+        if (status === 'paid') {
           setIsPolling(false)
           clearInterval(pollInterval)
 
-          // Confirm payment to ensure enrollment is created and status is updated
+          // Confirm payment to ensure enrollment is created (in case webhook didn't create it)
           if (currentSession?.orderId) {
             try {
               console.log('💳 Confirming payment with orderId:', currentSession.orderId)
@@ -230,15 +220,15 @@ export default function CheckoutPage() {
               }
               
               // Add transactionId if available
-              if (transactionId) {
-                confirmPayload.transactionId = transactionId
+              if (order.transactionId) {
+                confirmPayload.transactionId = order.transactionId
               }
               
               await apiClient.post('/payments/confirm', confirmPayload)
               console.log('✅ Payment confirmed and enrollment created')
             } catch (err: any) {
               console.error('❌ Failed to confirm payment:', err)
-              // Continue anyway - might already be confirmed
+              // Continue anyway - might already be confirmed by webhook
             }
           }
 
