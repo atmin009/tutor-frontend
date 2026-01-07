@@ -301,7 +301,7 @@ export default function SiteHeader() {
           <div className="flex h-[calc(100%-73px)] flex-col overflow-y-auto">
             <nav className="flex flex-col gap-1.5 px-4 py-5" aria-label="Mobile primary navigation">
               {navLinks.map((link) => {
-                const iconMap: Record<string, JSX.Element> = {
+                const iconMap: Record<string, React.ReactElement> = {
                   '/': (
                     <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
