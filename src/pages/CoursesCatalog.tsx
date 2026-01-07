@@ -173,9 +173,25 @@ export default function CoursesCatalog() {
 
                     <Link
                       to={`/courses/${getCourseUrlIdentifier(course)}`}
-                      className="mt-4 block w-full rounded-lg bg-[#003366] px-4 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-[#002244]"
+                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#003366] px-4 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-[#002244]"
                     >
-                      รายละเอียด
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <span>กดที่นี่ เพื่อดูรายละเอียด</span>
                     </Link>
                   </div>
                 </div>

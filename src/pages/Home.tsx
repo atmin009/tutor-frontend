@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import apiClient from '../api/axios'
 import { getCourseUrlIdentifier } from '../utils/courseHelper'
+import BannerSlider from '../components/BannerSlider'
 
 interface Course {
   id: number
@@ -71,39 +72,39 @@ export default function Home() {
 
   return (
     <div className="space-y-16">
-      {/* Hero Banner Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-8 py-16 text-white shadow-2xl md:px-12 md:py-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-brand/20 via-brand/10 to-transparent"></div>
-        <div className="relative z-10 mx-auto max-w-4xl text-center">
-          <h1 className="text-3xl font-bold leading-tight text-white drop-shadow-lg md:text-5xl lg:text-6xl">
-            ติวออนไลน์ครบทุกระดับชั้น ประถม – ม.ต้น – ม.ปลาย
+      {/* Hero Banner Section - Full width */}
+      <BannerSlider />
+
+      {/* SEO-friendly Hero Content (separate from slide visuals) */}
+      <header className="mx-auto max-w-4xl text-center">
+        <h1 className="text-2xl font-bold leading-tight text-slate-900 sm:text-3xl md:text-5xl">
+          ติวออนไลน์ครบทุกระดับชั้น ประถม – ม.ต้น – ม.ปลาย
         </h1>
-          <p className="mt-6 text-xl font-semibold text-white drop-shadow-md md:text-2xl">
-            เรียนออนไลน์เพิ่มเกรด พร้อมสอบเข้า ม.1 ม.4 และสอบเข้ามหาวิทยาลัย
-          </p>
-          <p className="mt-6 text-lg text-white drop-shadow-sm md:text-xl">
-            กำลังมองหาคอร์ส เรียนออนไลน์ หรือ ติวออนไลน์ แบบเข้าใจง่าย เนื้อหาครบ และช่วยให้คะแนนดีขึ้นจริงไหม?
-          </p>
-          <p className="mt-4 text-base text-white drop-shadow-sm">
-            ที่ <strong className="font-bold">บริษัท มีเดียแอนด์เทรนนิ่ง จำกัด</strong> เรารวมทีมผู้สอนมืออาชีพ เพื่อออกแบบบทเรียนที่เหมาะกับนักเรียนทุกระดับชั้น ทั้ง ประถม, มัธยมต้น, และ มัธยมปลาย
-          </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
+        <p className="mt-4 text-base font-semibold text-slate-700 sm:text-lg md:text-2xl">
+          เรียนออนไลน์เพิ่มเกรด พร้อมสอบเข้า ม.1 ม.4 และสอบเข้ามหาวิทยาลัย
+        </p>
+        <p className="mt-4 text-sm text-slate-600 sm:text-base md:text-lg">
+          กำลังมองหาคอร์ส เรียนออนไลน์ หรือ ติวออนไลน์ แบบเข้าใจง่าย เนื้อหาครบ และช่วยให้คะแนนดีขึ้นจริงไหม?
+        </p>
+        <p className="mt-3 text-sm text-slate-600 sm:text-base">
+          ที่ <strong className="font-bold text-slate-900">บริษัท มีเดียแอนด์เทรนนิ่ง จำกัด</strong> เรารวมทีมผู้สอนมืออาชีพ
+          เพื่อออกแบบบทเรียนที่เหมาะกับนักเรียนทุกระดับชั้น ทั้ง ประถม, มัธยมต้น, และ มัธยมปลาย
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link
             to="/courses"
-              className="rounded-full bg-white px-8 py-4 text-base font-semibold text-brand shadow-lg transition-all hover:bg-white/90 hover:shadow-xl"
+            className="rounded-full bg-brand px-7 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#1d4ed8] hover:text-white hover:shadow-lg sm:px-8 sm:py-4 sm:text-base"
           >
-              ดูคอร์สทั้งหมด
+            ดูคอร์สทั้งหมด
           </Link>
           <Link
             to="/auth/register"
-              className="rounded-full border-2 border-white/40 bg-white/10 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
+            className="rounded-full border-2 border-brand/30 bg-white px-7 py-3 text-sm font-semibold text-brand shadow-sm transition-all hover:border-brand hover:bg-slate-50 sm:px-8 sm:py-4 sm:text-base"
           >
-              เริ่มเรียนเลย
+            เริ่มเรียนเลย
           </Link>
         </div>
-      </div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-10"></div>
-      </section>
+      </header>
 
       {/* Key Benefits Section */}
       <section className="space-y-8">
