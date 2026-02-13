@@ -78,17 +78,17 @@ export default function Home() {
       {/* SEO-friendly Hero Content (separate from slide visuals) */}
       <header className="mx-auto max-w-4xl text-center">
         <h1 className="text-2xl font-bold leading-tight text-slate-900 sm:text-3xl md:text-5xl">
-          ติวออนไลน์ครบทุกระดับชั้น ประถม – ม.ต้น – ม.ปลาย
+          ติวออนไลน์ คณิตศาสตร์ และวิทยาศาสตร์ ระดับประถมปลาย
         </h1>
         <p className="mt-4 text-base font-semibold text-slate-700 sm:text-lg md:text-2xl">
-          เรียนออนไลน์เพิ่มเกรด พร้อมสอบเข้า ม.1 ม.4 และสอบเข้ามหาวิทยาลัย
+          ครอบคลุมเนื้อหาอย่างละเอียด ตั้งแต่พื้นฐานจนถึงการประยุกต์
         </p>
         <p className="mt-4 text-sm text-slate-600 sm:text-base md:text-lg">
-          กำลังมองหาคอร์ส เรียนออนไลน์ หรือ ติวออนไลน์ แบบเข้าใจง่าย เนื้อหาครบ และช่วยให้คะแนนดีขึ้นจริงไหม?
+          เหมาะสำหรับนักเรียนที่ต้องการเสริมความเข้าใจ เพิ่มผลการเรียน และเตรียมสอบอย่างมั่นใจ
         </p>
         <p className="mt-3 text-sm text-slate-600 sm:text-base">
-          ที่ <strong className="font-bold text-slate-900">บริษัท มีเดียแอนด์เทรนนิ่ง จำกัด</strong> เรารวมทีมผู้สอนมืออาชีพ
-          เพื่อออกแบบบทเรียนที่เหมาะกับนักเรียนทุกระดับชั้น ทั้ง ประถม, มัธยมต้น, และ มัธยมปลาย
+          ออกแบบบทเรียนให้เข้าใจง่าย เป็นระบบ
+          ช่วยวางรากฐานที่แข็งแรง พร้อมต่อยอดสู่ระดับมัธยมได้อย่างมีประสิทธิภาพ
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link
@@ -125,8 +125,8 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               ),
-              title: 'ครบทุกหลักสูตรที่ต้องสอบ',
-              description: 'หลักสูตร เพิ่มเกรด สำหรับโรงเรียนรัฐบาล–เอกชน, ติวเข้ม สอบเข้า ม.1, สอบเข้า ม.4, ตะลุยโจทย์ สอบเข้ามหาวิทยาลัย เช่น TCAS, วิชาสามัญ, TGAT–TPAT',
+              title: 'เนื้อหาครบถ้วน ตั้งแต่พื้นฐานจนถึงการประยุกต์',
+              description: 'ครอบคลุมทุกหัวข้อสำคัญในหลักสูตรระดับประถมปลาย ทั้งคณิตศาสตร์และวิทยาศาสตร์ เน้นความเข้าใจที่ลึกซึ้ง',
             },
             {
               icon: (
@@ -135,7 +135,7 @@ export default function Home() {
                 </svg>
               ),
               title: 'เน้น 2 วิชาหลัก คณิตศาสตร์ – วิทยาศาสตร์',
-              description: 'เหมาะสำหรับนักเรียนที่ต้องการปูพื้นฐานให้แน่น หรือเตรียมสอบแข่งขัน',
+              description: 'เหมาะสำหรับนักเรียนที่ต้องการเสริมความเข้าใจ เพิ่มผลการเรียน และวางรากฐานที่แข็งแรง',
             },
             {
               icon: (
@@ -161,8 +161,8 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               ),
-              title: 'อัปเดตเนื้อหาตามหลักสูตรใหม่ล่าสุด',
-              description: 'มั่นใจได้ว่าเรียนทันการปรับปรุงของโรงเรียนและหลักสูตร TCAS',
+              title: 'ออกแบบบทเรียนให้เข้าใจง่าย เป็นระบบ',
+              description: 'บทเรียนจัดเรียงอย่างเป็นระบบ ช่วยให้เรียนรู้ได้อย่างมีประสิทธิภาพ พร้อมต่อยอดสู่ระดับมัธยม',
             },
           ].map((benefit, index) => (
             <div
@@ -384,10 +384,10 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-brand/20 via-brand/10 to-transparent"></div>
         <div className="relative z-10">
           <h2 className="text-2xl font-bold text-white drop-shadow-lg md:text-3xl">
-            หากคุณกำลังมองหา ติวออนไลน์, เรียนออนไลน์, เพิ่มเกรด, หรือ เตรียมสอบเข้า ม.1 / ม.4 / มหาวิทยาลัย
+            หากคุณกำลังมองหา ติวออนไลน์ คณิตศาสตร์ และวิทยาศาสตร์ ระดับประถมปลาย
           </h2>
           <p className="mt-4 text-lg text-white drop-shadow-sm">
-            ระบบติวของ <strong className="font-bold">บริษัท มีเดียแอนด์เทรนนิ่ง จำกัด</strong> คือคำตอบที่ช่วยให้นักเรียนทุกระดับประสบความสำเร็จได้จริง
+            ด้วยบทเรียนที่ออกแบบให้เข้าใจง่าย เป็นระบบ <strong className="font-bold">บริษัท มีเดียแอนด์เทรนนิ่ง จำกัด</strong> ช่วยให้นักเรียนเสริมความเข้าใจ เพิ่มผลการเรียน และวางรากฐานที่แข็งแรง พร้อมต่อยอดสู่ระดับมัธยมได้อย่างมีประสิทธิภาพ
           </p>
           <div className="mt-8">
             <Link

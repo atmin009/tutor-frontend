@@ -19,7 +19,7 @@ export default function MainLayout() {
             <div>
               <h3 className="text-base font-bold text-slate-900">Media & Training Co., Ltd.</h3>
               <p className="mt-1.5 text-xs text-slate-600">
-                ติวออนไลน์ครบทุกระดับชั้น ประถม – ม.ต้น – ม.ปลาย
+                ติวออนไลน์ คณิตศาสตร์ และวิทยาศาสตร์ ระดับประถมปลาย
               </p>
             </div>
 
