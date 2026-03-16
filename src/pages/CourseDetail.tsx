@@ -171,6 +171,11 @@ export default function CourseDetail() {
     }).format(price)
   }
 
+  const resolvedPreviewVideoUrl = useMemo(() => {
+    if (!course?.previewVideoUrl) return null
+    return getVideoSource(course.previewVideoUrl, undefined)
+  }, [course?.previewVideoUrl])
+
   const toggleSection = (sectionId: number) => {
     setExpandedSections((prev) => {
       const next = new Set(prev)
@@ -220,11 +225,6 @@ export default function CourseDetail() {
   }
 
   const hasSale = course.salePrice !== null && course.salePrice < course.price
-
-  const resolvedPreviewVideoUrl = useMemo(() => {
-    if (!course.previewVideoUrl) return null
-    return getVideoSource(course.previewVideoUrl, undefined)
-  }, [course.previewVideoUrl])
 
   return (
     <div className="space-y-8">
