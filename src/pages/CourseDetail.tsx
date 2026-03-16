@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useEffect, useState, useMemo } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import apiClient from '../api/axios'
 import { isYouTubeUrl, getVideoSource } from '../utils/videoHelper'
+import VideoPlayer from '../components/VideoPlayer'
+import { useBundleStore } from '../store/bundleStore'
 
 type Section = {
   id: number
@@ -47,12 +49,14 @@ type CourseResponse = {
 
 export default function CourseDetail() {
   const { slug } = useParams<{ slug: string }>()
+  const navigate = useNavigate()
   const { isLoggedIn, user } = useAuthStore()
   const [course, setCourse] = useState<Course | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set())
   const [isEnrolled, setIsEnrolled] = useState(false)
+  const { selectedCourses, addCourse, removeCourse, setBundleId } = useBundleStore()
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -217,6 +221,11 @@ export default function CourseDetail() {
 
   const hasSale = course.salePrice !== null && course.salePrice < course.price
 
+  const resolvedPreviewVideoUrl = useMemo(() => {
+    if (!course.previewVideoUrl) return null
+    return getVideoSource(course.previewVideoUrl, undefined)
+  }, [course.previewVideoUrl])
+
   return (
     <div className="space-y-8">
       {/* Cover Image Banner */}
@@ -292,13 +301,12 @@ export default function CourseDetail() {
                     style={{ pointerEvents: 'auto' }}
                   />
                 ) : (
-                  <video
-                    src={getVideoSource(course.previewVideoUrl) || ''}
-                    controls
-                    className="h-full w-full"
-                  >
-                    เบราว์เซอร์ของคุณไม่รองรับแท็กวิดีโอ
-                  </video>
+                  resolvedPreviewVideoUrl && (
+                    <VideoPlayer
+                      src={resolvedPreviewVideoUrl}
+                      className="h-full w-full"
+                    />
+                  )
                 )}
               </div>
             </div>
@@ -397,59 +405,83 @@ export default function CourseDetail() {
           </div>
         </div>
 
-        {/* Right Column - Purchase Card */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-4 rounded-xl border border-slate-200 bg-white p-6 shadow-lg">
-            <div className="space-y-4">
-              {/* Price */}
-              <div>
-                {hasSale ? (
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-3xl font-bold text-slate-900">
-                        {formatPrice(course.salePrice!)}
-                      </span>
-                      <span className="text-lg text-slate-500 line-through">
-                        {formatPrice(course.price)}
+        {/* Right Column - Purchase Card + Bundle (prototype) */}
+        <div className="lg:col-span-1 space-y-4">
+          <div className="sticky top-4 space-y-4">
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-lg">
+              <div className="space-y-4">
+                {/* Price */}
+                <div>
+                  {hasSale ? (
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-3xl font-bold text-slate-900">
+                          {formatPrice(course.salePrice!)}
+                        </span>
+                        <span className="text-lg text-slate-500 line-through">
+                          {formatPrice(course.price)}
+                        </span>
+                      </div>
+                      <span className="mt-1 inline-block rounded bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">
+                        กำลังลดราคา
                       </span>
                     </div>
-                    <span className="mt-1 inline-block rounded bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">
-                      กำลังลดราคา
-                    </span>
-                  </div>
+                  ) : (
+                    <div className="text-3xl font-bold text-slate-900">
+                      {course.price > 0 ? formatPrice(course.price) : 'ฟรี'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Button */}
+                {!isLoggedIn ? (
+                  <Link
+                    to="/auth/login"
+                    className="block w-full rounded-lg bg-[#2563eb] px-4 py-3 text-center text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#1d4ed8] hover:shadow-lg"
+                  >
+                    เข้าสู่ระบบเพื่อซื้อ
+                  </Link>
+                ) : isEnrolled ? (
+                  <Link
+                    to={`/learning/${course.id}`}
+                    className="block w-full rounded-lg bg-green-600 px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-green-700"
+                  >
+                    ไปเรียน
+                  </Link>
                 ) : (
-                  <div className="text-3xl font-bold text-slate-900">
-                    {course.price > 0 ? formatPrice(course.price) : 'ฟรี'}
-                  </div>
+                  <Link
+                    to={`/checkout/${course.id}`}
+                    className="block w-full rounded-lg bg-[#CC0000] px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-[#AA0000]"
+                  >
+                    ซื้อคอร์ส
+                  </Link>
+                )}
+
+                {/* Bundle selection toggle (prototype) */}
+                {isLoggedIn && !isEnrolled && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const exists = selectedCourses.find((c) => c.id === course.id)
+                      if (exists) {
+                        removeCourse(course.id)
+                      } else {
+                        addCourse({ id: course.id, title: course.title })
+                      }
+                    }}
+                    className="mt-2 w-full rounded-lg border border-dashed border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    {selectedCourses.find((c) => c.id === course.id)
+                      ? 'เอาคอร์สนี้ออกจากชุดโปร'
+                      : 'เพิ่มคอร์สนี้ในชุดโปร (ต้นแบบ)'}
+                  </button>
                 )}
               </div>
+            </div>
 
-              {/* Action Button */}
-              {!isLoggedIn ? (
-                <Link
-                  to="/auth/login"
-                  className="block w-full rounded-lg bg-[#2563eb] px-4 py-3 text-center text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#1d4ed8] hover:shadow-lg"
-                >
-                  เข้าสู่ระบบเพื่อซื้อ
-                </Link>
-              ) : isEnrolled ? (
-                <Link
-                  to={`/learning/${course.id}`}
-                  className="block w-full rounded-lg bg-green-600 px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-green-700"
-                >
-                  ไปเรียน
-                </Link>
-              ) : (
-                <Link
-                  to={`/checkout/${course.id}`}
-                  className="block w-full rounded-lg bg-[#CC0000] px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-[#AA0000]"
-                >
-                  ซื้อคอร์ส
-                </Link>
-              )}
-
-              {/* Course Info */}
-              <div className="space-y-2 border-t border-slate-200 pt-4 text-sm">
+            {/* Course Info */}
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-slate-600">ส่วน:</span>
                   <span className="font-medium text-slate-900">
@@ -467,6 +499,40 @@ export default function CourseDetail() {
                 </div>
               </div>
             </div>
+
+            {/* Bundle summary (very simple prototype, bundleId fixed = 1) */}
+            {isLoggedIn && selectedCourses.length > 0 && (
+              <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 shadow-sm">
+                <h3 className="mb-2 text-sm font-semibold text-indigo-900">
+                  คอร์สในชุดโปรที่เลือก ({selectedCourses.length})
+                </h3>
+                <ul className="mb-3 space-y-1 text-xs text-indigo-900">
+                  {selectedCourses.map((c) => (
+                    <li key={c.id} className="flex justify-between">
+                      <span className="line-clamp-1">{c.title}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeCourse(c.id)}
+                        className="ml-2 text-[11px] text-indigo-700 hover:text-indigo-900"
+                      >
+                        ลบ
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // NOTE: prototype: ใช้ bundleId = 1 ที่ admin กำหนดไว้
+                    setBundleId(1)
+                    navigate('/checkout-bundle')
+                  }}
+                  className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
+                >
+                  ใช้โปรซื้อหลายคอร์ส (ต้นแบบ)
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

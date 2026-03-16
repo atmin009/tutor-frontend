@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore'
 import apiClient from '../api/axios'
 import { isYouTubeUrl, getVideoSource } from '../utils/videoHelper'
 import PaymentSuccess from './PaymentSuccess'
+import VideoPlayer from '../components/VideoPlayer'
 
 type Lesson = {
   id: number
@@ -291,14 +292,11 @@ export default function LearningCoursePage() {
                             style={{ pointerEvents: 'auto' }}
                           />
                         ) : (
-                          <video
+                          <VideoPlayer
                             src={getVideoSource(currentLesson.contentUrl) || ''}
-                            controls
                             className="h-full w-full"
                             onEnded={handleLessonComplete}
-                          >
-                            Your browser does not support the video tag.
-                          </video>
+                          />
                         )}
                       </div>
                       <button
@@ -385,14 +383,11 @@ export default function LearningCoursePage() {
                         style={{ pointerEvents: 'auto' }}
                       />
                     ) : (
-                      <video
+                      <VideoPlayer
                         src={getVideoSource(currentSection.videoUrl) || ''}
-                        controls
                         className="h-full w-full"
                         onEnded={handleLessonComplete}
-                      >
-                        Your browser does not support the video tag.
-                      </video>
+                      />
                     )}
                   </div>
                   <button
