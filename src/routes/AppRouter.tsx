@@ -9,7 +9,6 @@ import {
 import MainLayout from '../layouts/MainLayout'
 import AuthLayout from '../layouts/AuthLayout'
 import CheckoutPage from '../pages/CheckoutPage'
-import CheckoutBundlePage from '../pages/CheckoutBundlePage'
 import CourseDetail from '../pages/CourseDetail'
 import CoursesCatalog from '../pages/CoursesCatalog'
 import Home from '../pages/Home'
@@ -48,7 +47,6 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: '/checkout/:courseId', element: <CheckoutPage /> },
-          { path: '/checkout-bundle', element: <CheckoutBundlePage /> },
           { path: '/learning', element: <LearningDashboard /> },
           { path: '/learning/:courseId', element: <LearningCoursePage /> },
         ],
