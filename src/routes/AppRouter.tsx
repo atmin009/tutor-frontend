@@ -10,6 +10,7 @@ import MainLayout from '../layouts/MainLayout'
 import AuthLayout from '../layouts/AuthLayout'
 import CheckoutPage from '../pages/CheckoutPage'
 import CourseDetail from '../pages/CourseDetail'
+import BundleDetailPage from '../pages/BundleDetailPage'
 import CoursesCatalog from '../pages/CoursesCatalog'
 import Home from '../pages/Home'
 import Contact from '../pages/Contact'
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
       { path: '/', element: <Home /> },
       { path: '/courses', element: <CoursesCatalog /> },
       { path: '/courses/:slug', element: <CourseDetail /> },
+      { path: '/bundles/:id', element: <BundleDetailPage /> },
       { path: '/contact', element: <Contact /> },
       {
         element: <ProtectedRoute />,
