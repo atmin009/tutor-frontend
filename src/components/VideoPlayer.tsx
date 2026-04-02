@@ -29,7 +29,8 @@ export default function VideoPlayer({ src, poster, className, onEnded }: VideoPl
 
     // Clean up any previous instances without removing React-managed DOM
     if (playerRef.current) {
-      playerRef.current.destroy(true)
+      // Plyr's TS types don't model the boolean param; runtime supports it.
+      ;(playerRef.current as unknown as { destroy: (soft?: boolean) => void }).destroy(true)
       playerRef.current = null
     }
     if (hlsRef.current) {
@@ -101,7 +102,7 @@ export default function VideoPlayer({ src, poster, className, onEnded }: VideoPl
         video.removeEventListener('ended', onEnded)
       }
       if (playerRef.current) {
-        playerRef.current.destroy(true)
+        ;(playerRef.current as unknown as { destroy: (soft?: boolean) => void }).destroy(true)
         playerRef.current = null
       }
       if (hlsRef.current) {
