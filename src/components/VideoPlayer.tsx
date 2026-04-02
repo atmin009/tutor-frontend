@@ -67,7 +67,6 @@ export default function VideoPlayer({ src, poster, className, onEnded }: VideoPl
       playsInline
       controls
       poster={poster}
-      crossOrigin="anonymous"
     />
   )
 }
