@@ -143,9 +143,18 @@ export default function LearningCoursePage() {
 
   const handleSectionClick = (section: Section) => {
     // Selecting a section should immediately update the main player.
-    // We show section-level content (video/attachments). Lessons are selected explicitly.
+    // Prefer section-level videoUrl. If missing, fall back to the first lesson video in that section.
     setCurrentSection(section)
-    setCurrentLesson(null)
+
+    if (section.videoUrl) {
+      setCurrentLesson(null)
+    } else {
+      const firstVideoLesson =
+        section.lessons.find((l) => l.contentType === 'video' && l.contentUrl) ||
+        section.lessons[0] ||
+        null
+      setCurrentLesson(firstVideoLesson)
+    }
 
     setExpandedSections((prev) => {
       const next = new Set(prev)
