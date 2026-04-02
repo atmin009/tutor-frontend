@@ -15,6 +15,14 @@ export default function VideoPlayer({ src, poster, className, onEnded }: VideoPl
   const playerRef = useRef<Plyr | null>(null)
   const hlsRef = useRef<Hls | null>(null)
 
+  const getMimeTypeFromUrl = (url: string): string => {
+    const clean = url.split('?')[0].split('#')[0].toLowerCase()
+    if (clean.endsWith('.webm')) return 'video/webm'
+    if (clean.endsWith('.ogv') || clean.endsWith('.ogg')) return 'video/ogg'
+    if (clean.endsWith('.m3u8')) return 'application/vnd.apple.mpegurl'
+    return 'video/mp4'
+  }
+
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
@@ -100,10 +108,21 @@ export default function VideoPlayer({ src, poster, className, onEnded }: VideoPl
         }
       })
     } else {
-      video.src = src
+      // For plain files (mp4/webm/ogg), update via Plyr API to ensure it swaps sources correctly.
+      ;(player as unknown as { source: unknown }).source = {
+        type: 'video',
+        title: '',
+        sources: [
+          {
+            src,
+            type: getMimeTypeFromUrl(src),
+          },
+        ],
+        poster,
+      }
     }
 
-    // Force reload; this is the key to making the visual switch immediate.
+    // Force reload; helps ensure the element swaps immediately.
     video.load()
   }, [src])
 
@@ -114,6 +133,7 @@ export default function VideoPlayer({ src, poster, className, onEnded }: VideoPl
       playsInline
       controls
       poster={poster}
+      crossOrigin="anonymous"
     />
   )
 }
