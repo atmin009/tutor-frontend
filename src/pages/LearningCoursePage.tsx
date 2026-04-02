@@ -365,38 +365,67 @@ export default function LearningCoursePage() {
                     </button>
                   </div>
                 )}
+
+                {/* Link Content */}
+                {currentLesson.contentType === 'link' && currentLesson.contentUrl && (
+                  <div className="space-y-4">
+                    <p className="text-slate-600">เปิดลิงก์เพื่อดูบทเรียนนี้</p>
+                    <div className="flex gap-2">
+                      <a
+                        href={currentLesson.contentUrl || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block rounded-lg bg-[#2563eb] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1d4ed8] shadow-sm"
+                      >
+                        🔗 เปิดลิงก์
+                      </a>
+                    </div>
+                    <button
+                      onClick={handleLessonComplete}
+                      className="mt-2 w-full rounded-lg bg-[#2563eb] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1d4ed8] shadow-sm"
+                    >
+                      ✓ ทำเครื่องหมายว่าเรียนเสร็จแล้ว
+                    </button>
+                  </div>
+                )}
               </>
-            ) : currentSection && currentSection.videoUrl ? (
+            ) : currentSection && (currentSection.videoUrl || currentSection.attachmentUrl) ? (
               <>
                 <h2 className="mb-4 text-xl font-semibold text-slate-900">
                   {currentSection.title}
                 </h2>
-                <div className="space-y-4">
-                  <div className="aspect-video w-full overflow-hidden rounded-lg bg-slate-900">
-                    {isYouTubeUrl(currentSection.videoUrl) ? (
-                      <iframe
-                        src={getVideoSource(currentSection.videoUrl)}
-                        className="h-full w-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        title={currentSection.title}
-                        style={{ pointerEvents: 'auto' }}
-                      />
-                    ) : (
-                      <VideoPlayer
-                        src={getVideoSource(currentSection.videoUrl) || ''}
-                        className="h-full w-full"
-                        onEnded={handleLessonComplete}
-                      />
-                    )}
+                {currentSection.videoUrl ? (
+                  <div className="space-y-4">
+                    <div className="aspect-video w-full overflow-hidden rounded-lg bg-slate-900">
+                      {isYouTubeUrl(currentSection.videoUrl) ? (
+                        <iframe
+                          src={getVideoSource(currentSection.videoUrl)}
+                          className="h-full w-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title={currentSection.title}
+                          style={{ pointerEvents: 'auto' }}
+                        />
+                      ) : (
+                        <VideoPlayer
+                          src={getVideoSource(currentSection.videoUrl) || ''}
+                          className="h-full w-full"
+                          onEnded={handleLessonComplete}
+                        />
+                      )}
+                    </div>
+                    <button
+                      onClick={handleLessonComplete}
+                      className="w-full rounded-lg bg-[#2563eb] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1d4ed8] shadow-sm"
+                    >
+                      ✓ ทำเครื่องหมายว่าเรียนเสร็จแล้ว
+                    </button>
                   </div>
-                  <button
-                    onClick={handleLessonComplete}
-                    className="w-full rounded-lg bg-[#2563eb] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1d4ed8] shadow-sm"
-                  >
-                    ✓ ทำเครื่องหมายว่าเรียนเสร็จแล้ว
-                  </button>
-                </div>
+                ) : (
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-slate-700">
+                    <p>ไม่มีวิดีโอในส่วนนี้</p>
+                  </div>
+                )}
                 {currentSection.attachmentUrl && (
                   <div className="mt-4 space-y-2">
                     <a
