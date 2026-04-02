@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import apiClient from '../api/axios'
@@ -68,6 +68,38 @@ export default function LearningCoursePage() {
   const [currentSection, setCurrentSection] = useState<Section | null>(null)
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set())
 
+  const resolvedCurrentLessonVideoSrc = useMemo(() => {
+    if (!currentLesson?.contentUrl) return null
+    if (currentLesson.contentType !== 'video') return null
+    return getVideoSource(currentLesson.contentUrl) || currentLesson.contentUrl
+  }, [currentLesson?.contentType, currentLesson?.contentUrl])
+
+  const resolvedCurrentSectionVideoSrc = useMemo(() => {
+    if (!currentSection?.videoUrl) return null
+    return getVideoSource(currentSection.videoUrl) || currentSection.videoUrl
+  }, [currentSection?.videoUrl])
+
+  useEffect(() => {
+    console.log('🎬 currentSection changed:', {
+      id: currentSection?.id,
+      title: currentSection?.title,
+      videoUrl: currentSection?.videoUrl,
+      attachmentUrl: currentSection?.attachmentUrl,
+      lessonsCount: currentSection?.lessons?.length,
+      resolvedSrc: resolvedCurrentSectionVideoSrc,
+    })
+  }, [currentSection?.id, resolvedCurrentSectionVideoSrc])
+
+  useEffect(() => {
+    console.log('🎬 currentLesson changed:', {
+      id: currentLesson?.id,
+      title: currentLesson?.title,
+      contentType: currentLesson?.contentType,
+      contentUrl: currentLesson?.contentUrl,
+      resolvedSrc: resolvedCurrentLessonVideoSrc,
+    })
+  }, [currentLesson?.id, resolvedCurrentLessonVideoSrc])
+
   useEffect(() => {
     if (!isLoggedIn) {
       navigate('/auth/login?redirect=/learning', { replace: true })
@@ -135,6 +167,14 @@ export default function LearningCoursePage() {
   }, [courseId, isLoggedIn, navigate])
 
   const handleLessonClick = (lesson: Lesson, section: Section) => {
+    console.log('🖱️ lesson click:', {
+      sectionId: section.id,
+      sectionTitle: section.title,
+      lessonId: lesson.id,
+      lessonTitle: lesson.title,
+      contentType: lesson.contentType,
+      contentUrl: lesson.contentUrl,
+    })
     setCurrentLesson(lesson)
     setCurrentSection(section)
     // Expand the section if not already expanded
@@ -142,6 +182,14 @@ export default function LearningCoursePage() {
   }
 
   const handleSectionClick = (section: Section) => {
+    console.log('🖱️ section click:', {
+      sectionId: section.id,
+      sectionTitle: section.title,
+      videoUrl: section.videoUrl,
+      attachmentUrl: section.attachmentUrl,
+      lessonsCount: section.lessons.length,
+      lessonIds: section.lessons.map((l) => l.id),
+    })
     // Selecting a section should immediately update the main player.
     // Prefer section-level videoUrl. If missing, fall back to the first lesson video in that section.
     setCurrentSection(section)
@@ -153,6 +201,7 @@ export default function LearningCoursePage() {
         section.lessons.find((l) => l.contentType === 'video' && l.contentUrl) ||
         section.lessons[0] ||
         null
+      console.log('🎯 section fallback lesson selected:', firstVideoLesson)
       setCurrentLesson(firstVideoLesson)
     }
 
