@@ -19,39 +19,7 @@ export default function VideoPlayer({ src, poster, className, onEnded }: VideoPl
     const video = videoRef.current
     if (!video) return
 
-    // Hard reset previous playback immediately when switching lessons
-    try {
-      video.pause()
-      video.currentTime = 0
-    } catch {
-      // ignore
-    }
-
-    // Clean up any previous instances without removing React-managed DOM
-    if (playerRef.current) {
-      // Plyr's TS types don't model the boolean param; runtime supports it.
-      ;(playerRef.current as unknown as { destroy: (soft?: boolean) => void }).destroy(true)
-      playerRef.current = null
-    }
-    if (hlsRef.current) {
-      hlsRef.current.destroy()
-      hlsRef.current = null
-    }
-
-    if (src.endsWith('.m3u8') && Hls.isSupported()) {
-      const hls = new Hls()
-      hls.loadSource(src)
-      hls.attachMedia(video)
-      hlsRef.current = hls
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = src
-    } else {
-      video.src = src
-    }
-
-    // Force the element to load the new source immediately
-    video.load()
-
+    // Create Plyr once; update source in a separate effect.
     const player = new Plyr(video, {
       controls: [
         'play',
@@ -70,8 +38,45 @@ export default function VideoPlayer({ src, poster, className, onEnded }: VideoPl
       video.addEventListener('ended', onEnded)
     }
 
-    const hls = hlsRef.current
-    if (hls) {
+    return () => {
+      if (onEnded) {
+        video.removeEventListener('ended', onEnded)
+      }
+      if (playerRef.current) {
+        ;(playerRef.current as unknown as { destroy: (soft?: boolean) => void }).destroy(true)
+        playerRef.current = null
+      }
+      if (hlsRef.current) {
+        hlsRef.current.destroy()
+        hlsRef.current = null
+      }
+    }
+  }, [onEnded])
+
+  useEffect(() => {
+    const video = videoRef.current
+    const player = playerRef.current
+    if (!video || !player) return
+
+    // Reset playback immediately when switching sources
+    try {
+      video.pause()
+      video.currentTime = 0
+    } catch {
+      // ignore
+    }
+
+    if (hlsRef.current) {
+      hlsRef.current.destroy()
+      hlsRef.current = null
+    }
+
+    if (src.endsWith('.m3u8') && Hls.isSupported()) {
+      const hls = new Hls()
+      hls.loadSource(src)
+      hls.attachMedia(video)
+      hlsRef.current = hls
+
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         const levels = hls.levels || []
         const availableQualities = levels
@@ -87,7 +92,6 @@ export default function VideoPlayer({ src, poster, className, onEnded }: VideoPl
           options: availableQualities,
           forced: true,
           onChange: (newQuality: number) => {
-            if (!hls) return
             const levelIndex = hls.levels.findIndex((level) => level.height === newQuality)
             if (levelIndex !== -1) {
               hls.currentLevel = levelIndex
@@ -95,22 +99,13 @@ export default function VideoPlayer({ src, poster, className, onEnded }: VideoPl
           },
         }
       })
+    } else {
+      video.src = src
     }
 
-    return () => {
-      if (onEnded) {
-        video.removeEventListener('ended', onEnded)
-      }
-      if (playerRef.current) {
-        ;(playerRef.current as unknown as { destroy: (soft?: boolean) => void }).destroy(true)
-        playerRef.current = null
-      }
-      if (hlsRef.current) {
-        hlsRef.current.destroy()
-        hlsRef.current = null
-      }
-    }
-  }, [src, onEnded])
+    // Force reload; this is the key to making the visual switch immediate.
+    video.load()
+  }, [src])
 
   return (
     <video
