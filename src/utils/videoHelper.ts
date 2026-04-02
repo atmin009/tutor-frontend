@@ -70,6 +70,19 @@ export function getVideoSource(url: string | null, baseUrl?: string): string | u
     return getYouTubeEmbedUrl(url);
   }
 
+  // Proxy Google Cloud Storage URLs through our backend to avoid CORS issues in browsers
+  // (storage.googleapis.com does not always send Access-Control-Allow-Origin for ranged video requests)
+  if (typeof window !== 'undefined') {
+    try {
+      const u = new URL(url);
+      if (u.protocol === 'https:' && u.hostname === 'storage.googleapis.com') {
+        return `/api/media/proxy?url=${encodeURIComponent(url)}`;
+      }
+    } catch {
+      // ignore invalid absolute URLs and continue
+    }
+  }
+
   // If it's a relative URL and baseUrl is provided, prepend baseUrl
   if (baseUrl && url.startsWith('/')) {
     return `${baseUrl}${url}`;
