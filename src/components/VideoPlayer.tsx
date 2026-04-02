@@ -12,22 +12,43 @@ type VideoPlayerProps = {
 
 export default function VideoPlayer({ src, poster, className, onEnded }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  const playerRef = useRef<Plyr | null>(null)
+  const hlsRef = useRef<Hls | null>(null)
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
-    let hls: Hls | null = null
+    // Hard reset previous playback immediately when switching lessons
+    try {
+      video.pause()
+      video.currentTime = 0
+    } catch {
+      // ignore
+    }
+
+    if (playerRef.current) {
+      playerRef.current.destroy()
+      playerRef.current = null
+    }
+    if (hlsRef.current) {
+      hlsRef.current.destroy()
+      hlsRef.current = null
+    }
 
     if (src.endsWith('.m3u8') && Hls.isSupported()) {
-      hls = new Hls()
+      const hls = new Hls()
       hls.loadSource(src)
       hls.attachMedia(video)
+      hlsRef.current = hls
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = src
     } else {
       video.src = src
     }
+
+    // Force the element to load the new source immediately
+    video.load()
 
     const player = new Plyr(video, {
       controls: [
@@ -41,14 +62,16 @@ export default function VideoPlayer({ src, poster, className, onEnded }: VideoPl
       ],
       settings: ['quality'],
     })
+    playerRef.current = player
 
     if (onEnded) {
       video.addEventListener('ended', onEnded)
     }
 
+    const hls = hlsRef.current
     if (hls) {
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        const levels = hls?.levels || []
+        const levels = hls.levels || []
         const availableQualities = levels
           .map((l) => l.height)
           .filter((v, i, self) => v && self.indexOf(v) === i)
@@ -76,9 +99,13 @@ export default function VideoPlayer({ src, poster, className, onEnded }: VideoPl
       if (onEnded) {
         video.removeEventListener('ended', onEnded)
       }
-      player.destroy()
-      if (hls) {
-        hls.destroy()
+      if (playerRef.current) {
+        playerRef.current.destroy()
+        playerRef.current = null
+      }
+      if (hlsRef.current) {
+        hlsRef.current.destroy()
+        hlsRef.current = null
       }
     }
   }, [src, onEnded])

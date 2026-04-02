@@ -284,6 +284,7 @@ export default function LearningCoursePage() {
                       <div className="aspect-video w-full overflow-hidden rounded-lg bg-slate-900">
                         {isYouTubeUrl(currentLesson.contentUrl) ? (
                           <iframe
+                            key={getVideoSource(currentLesson.contentUrl) || currentLesson.contentUrl}
                             src={getVideoSource(currentLesson.contentUrl)}
                             className="h-full w-full"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -293,6 +294,7 @@ export default function LearningCoursePage() {
                           />
                         ) : (
                           <VideoPlayer
+                            key={getVideoSource(currentLesson.contentUrl) || currentLesson.contentUrl}
                             src={getVideoSource(currentLesson.contentUrl) || ''}
                             className="h-full w-full"
                             onEnded={handleLessonComplete}
@@ -399,6 +401,7 @@ export default function LearningCoursePage() {
                     <div className="aspect-video w-full overflow-hidden rounded-lg bg-slate-900">
                       {isYouTubeUrl(currentSection.videoUrl) ? (
                         <iframe
+                        key={getVideoSource(currentSection.videoUrl) || currentSection.videoUrl}
                           src={getVideoSource(currentSection.videoUrl)}
                           className="h-full w-full"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -408,6 +411,7 @@ export default function LearningCoursePage() {
                         />
                       ) : (
                         <VideoPlayer
+                        key={getVideoSource(currentSection.videoUrl) || currentSection.videoUrl}
                           src={getVideoSource(currentSection.videoUrl) || ''}
                           className="h-full w-full"
                           onEnded={handleLessonComplete}
