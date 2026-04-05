@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import apiClient from '../api/axios'
-import { getCourseUrlIdentifier } from '../utils/courseHelper'
+import { getCourseUrlIdentifier, resolveAssetUrl } from '../utils/courseHelper'
 import BannerSlider from '../components/BannerSlider'
 
 interface Course {
@@ -216,7 +216,7 @@ export default function Home() {
                   <div className="relative aspect-video overflow-hidden bg-slate-100">
                     {course.coverImage ? (
                       <img
-                        src={course.coverImage}
+                        src={resolveAssetUrl(course.coverImage)}
                         alt={course.title}
                         className="h-full w-full object-cover transition-transform group-hover:scale-105"
                       />
@@ -349,7 +349,7 @@ export default function Home() {
                   <div className="relative aspect-video overflow-hidden bg-slate-100">
                     {course.coverImage ? (
                       <img
-                        src={course.coverImage}
+                        src={resolveAssetUrl(course.coverImage)}
                         alt={course.title}
                         className="h-full w-full object-cover transition-transform group-hover:scale-105"
                       />

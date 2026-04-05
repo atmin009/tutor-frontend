@@ -1,3 +1,24 @@
+const API_ORIGIN = (() => {
+  const base = import.meta.env.VITE_API_BASE_URL as string | undefined;
+  if (!base) return '';
+  try {
+    const u = new URL(base);
+    return u.origin;
+  } catch {
+    return base.replace(/\/api\/?$/, '');
+  }
+})();
+
+/**
+ * Resolve a backend asset path (e.g. /uploads/courses/cover.jpg) to a full URL.
+ * If the value is already an absolute URL it is returned as-is.
+ */
+export function resolveAssetUrl(path: string | null | undefined): string {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  return `${API_ORIGIN}${path.startsWith('/') ? '' : '/'}${path}`;
+}
+
 /**
  * Helper function to get the course URL identifier
  * Uses slug if valid, otherwise falls back to course ID

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import apiClient from '../api/axios'
-import { getCourseUrlIdentifier } from '../utils/courseHelper'
+import { getCourseUrlIdentifier, resolveAssetUrl } from '../utils/courseHelper'
 
 type Course = {
   id: number
@@ -135,7 +135,7 @@ export default function CoursesCatalog() {
                   <div className="relative h-48 w-full overflow-hidden bg-slate-200">
                     {course.coverImage ? (
                       <img
-                        src={course.coverImage || ''}
+                        src={resolveAssetUrl(course.coverImage)}
                         alt={course.title}
                         className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
                       />

@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import apiClient from '../api/axios'
 import { isYouTubeUrl, getVideoSource } from '../utils/videoHelper'
+import { resolveAssetUrl } from '../utils/courseHelper'
 import VideoPlayer from '../components/VideoPlayer'
 type Section = {
   id: number
@@ -228,7 +229,7 @@ export default function CourseDetail() {
       {course.coverImage && (
         <div className="relative h-64 w-full overflow-hidden rounded-xl bg-slate-200 md:h-80">
           <img
-            src={course.coverImage || ''}
+            src={resolveAssetUrl(course.coverImage)}
             alt={course.title}
             className="h-full w-full object-cover"
           />
