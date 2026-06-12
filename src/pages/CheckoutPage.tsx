@@ -9,10 +9,12 @@ type PaymentSession = {
   originalAmount?: number
   discountAmount?: number
   couponId?: number
-  transactionId: string
+  transactionId: string | null
   paymentUrl: string | null
   qrImageUrl: string | null
   courseTitle: string
+  isFreeOrder?: boolean
+  status?: string
 }
 
 type PaymentSessionResponse = {
@@ -53,6 +55,28 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState<string | null>(null)
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false)
   const [originalPrice, setOriginalPrice] = useState<number | null>(null)
+
+  const handleFreeOrderComplete = () => {
+    setPaymentStatus('paid')
+    setIsPolling(false)
+    setTimeout(() => {
+      navigate(`/learning/${courseId}`, { replace: true })
+    }, 2000)
+  }
+
+  const handlePaymentSessionResponse = (session: PaymentSession) => {
+    if (session.originalAmount) {
+      setOriginalPrice(session.originalAmount)
+    }
+
+    if (session.isFreeOrder || session.status === 'paid' || session.amount === 0) {
+      handleFreeOrderComplete()
+      return session
+    }
+
+    setIsPolling(true)
+    return session
+  }
 
   // Redirect if not logged in
   useEffect(() => {
@@ -134,11 +158,7 @@ export default function CheckoutPage() {
           }
         )
 
-        setQrSession(response.data.data)
-        if (response.data.data.originalAmount) {
-          setOriginalPrice(response.data.data.originalAmount)
-        }
-        setIsPolling(true)
+        setQrSession(handlePaymentSessionResponse(response.data.data))
       } catch (err: any) {
         setError(err.response?.data?.message || 'Failed to create payment session')
       } finally {
@@ -167,11 +187,7 @@ export default function CheckoutPage() {
           }
         )
 
-        setCardSession(response.data.data)
-        if (response.data.data.originalAmount) {
-          setOriginalPrice(response.data.data.originalAmount)
-        }
-        setIsPolling(true)
+        setCardSession(handlePaymentSessionResponse(response.data.data))
       } catch (err: any) {
         setError(err.response?.data?.message || 'Failed to create card payment session')
       } finally {
@@ -268,7 +284,7 @@ export default function CheckoutPage() {
         courseId: Number(courseId),
       })
 
-      if (response.data.data.discountAmount) {
+      if (response.data.data?.discountAmount != null) {
         setAppliedCoupon({
           code: couponCode.trim().toUpperCase(),
           discountAmount: response.data.data.discountAmount,
@@ -472,6 +488,7 @@ export default function CheckoutPage() {
               </h2>
 
               {/* Payment Method Tabs */}
+              {!(currentSession.isFreeOrder || currentSession.amount === 0) && (
               <div className="mb-6 flex gap-2 rounded-lg bg-slate-100 p-1">
                 <button
                   type="button"
@@ -496,9 +513,23 @@ export default function CheckoutPage() {
                   บัตรเครดิต
                 </button>
               </div>
+              )}
 
-              {/* QR Payment */}
-              {paymentMethod === 'qrnone' && (
+              {/* Free order — no payment required */}
+              {currentSession.isFreeOrder || currentSession.amount === 0 ? (
+                <div className="rounded-lg border border-green-200 bg-green-50 p-8 text-center">
+                  <div className="mb-2 text-4xl">🎉</div>
+                  <h3 className="mb-2 text-lg font-semibold text-green-900">
+                    ลงทะเบียนสำเร็จ!
+                  </h3>
+                  <p className="text-sm text-green-700">
+                    ใช้โค้ดส่วนลดครบ 100% ไม่ต้องชำระเงินเพิ่มเติม
+                  </p>
+                  <p className="mt-2 text-xs text-green-600">
+                    กำลังนำคุณไปยังคอร์สเรียน...
+                  </p>
+                </div>
+              ) : paymentMethod === 'qrnone' ? (
                 <div className="space-y-4">
                   {qrSession?.qrImageUrl ? (
                     <>
@@ -538,10 +569,7 @@ export default function CheckoutPage() {
                     </div>
                   )}
                 </div>
-              )}
-
-              {/* Credit Card Payment */}
-              {paymentMethod === 'card' && (
+              ) : (
                 <div className="space-y-4">
                   {isCreatingCard ? (
                     <div className="rounded-lg border border-slate-200 bg-slate-50 p-8 text-center">
